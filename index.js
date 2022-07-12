@@ -78,8 +78,8 @@ class LiquidJsx {
         }
       },
       JSXExpressionContainer: (child) => {
-        _child = `__el${elId}`;
-        childrenArray.push(self.convertJSXEspression(t, child, elId++));
+        _child = `__el${++elId}`;
+        childrenArray.push(self.convertJSXEspression(t, child, elId));
         return _child;
       },
       JSXSpreadChild: (child) => {
@@ -161,7 +161,7 @@ class LiquidJsx {
             t.identifier("Liquid"),
             t.identifier("createTextNode")
           ),
-          [t.stringLiteral(node.value)]
+          [t.stringLiteral(node.value.trim())]
         )
       ),
     ]);

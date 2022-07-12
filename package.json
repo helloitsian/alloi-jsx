@@ -1,6 +1,6 @@
 {
-  "name": "alloy-jsx",
-  "version": "1.0.0",
+  "name": "alloi-jsx",
+  "version": "0.0.1",
   "description": "A JSX parser plugin for AlloyJS",
   "main": "index.js",
   "scripts": {
