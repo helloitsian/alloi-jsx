@@ -1,12 +1,12 @@
 {
-  "name": "liquid-jsx",
+  "name": "alloy-jsx",
   "version": "1.0.0",
-  "description": "",
+  "description": "A JSX parser plugin for AlloyJS",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Ian Murawski (helloitsian)",
   "license": "ISC",
   "dependencies": {
     "@babel/core": "^7.18.6",
