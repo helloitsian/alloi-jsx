@@ -1,0 +1,1 @@
+module.exports.isCharUppercase = (char) => char === char.toUpperCase();
