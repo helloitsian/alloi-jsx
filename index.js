@@ -1,24 +1,21 @@
 const babel = require("@babel/core");
 const { isCharUppercase } = require("./util.js");
 
-class LiquidJsx {
+class AlloiJSX {
   constructor() {
     this.before = this.parseJsx;
     this.after = (code) => code;
 
     this.before = this.before.bind(this);
     this.after = this.after.bind(this);
-  }
+  } 
 
   createElementCreator(t, openingElement) {
     const { name } = openingElement.name;
     const { attributes } = openingElement;
 
     return t.callExpression(
-      t.memberExpression(
-        t.identifier("Liquid"),
-        t.identifier("createElement")
-      ),
+      t.memberExpression(t.identifier("AlloiDOM"), t.identifier("createElement")),
       [
         t.stringLiteral(name),
         t.objectExpression(
@@ -27,11 +24,10 @@ class LiquidJsx {
           })
         ),
       ]
-    )
+    );
   }
-      
 
-  createAppendChild(t, parent, child) {
+  createInsert(t, parent, child) {
     let _child = child;
 
     if (child.type === "JSXExpressionContainer") {
@@ -45,8 +41,8 @@ class LiquidJsx {
 
     return t.expressionStatement(
       t.callExpression(
-        t.memberExpression(t.identifier(parent), t.identifier("appendChild")),
-        [t.identifier(_child)]
+        t.memberExpression(t.identifier("AlloiDOM"), t.identifier("insert")),
+        [t.identifier(parent), t.identifier(_child)]
       )
     );
   }
@@ -89,27 +85,32 @@ class LiquidJsx {
       },
       JSXElement: (child) => {
         _child = `__el${elId}`;
-        childrenArray.push(self.convertJSXNode(t, child.openingElement, elId++));
+        childrenArray.push(
+          self.convertJSXNode(t, child.openingElement, elId++)
+        );
 
         // recurse through child's children
         if (child.children)
-          childrenArray = [...childrenArray, ...self.convertJSXChildren(t, child.children, elId)];
+          childrenArray = [
+            ...childrenArray,
+            ...self.convertJSXChildren(t, child.children, elId),
+          ];
 
         return _child;
-      }
-    }
+      },
+    };
 
     for (let i = 0; i < children.length; i++) {
       let child = children[i];
 
-      if  (!handlers[child.type]) {
+      if (!handlers[child.type]) {
         console.log(child.type);
       }
 
       let _child = handlers[child.type](child);
 
       if (_child) {
-        childrenArray.push(this.createAppendChild(t, _parent, _child));
+        childrenArray.push(this.createInsert(t, _parent, _child));
       }
     }
     return childrenArray;
@@ -123,13 +124,20 @@ class LiquidJsx {
     const component = t.variableDeclaration("const", [
       t.variableDeclarator(
         t.identifier(componentId),
-        t.callExpression(t.identifier(componentName), [
-          t.objectExpression(
-            attributes.map((attr) => {
-              return this.createAttribute(t, attr);
-            })
+        t.callExpression(
+          t.memberExpression(
+            t.identifier("Liquid"),
+            t.identifier("createComponent")
           ),
-        ])
+          [
+            t.identifier(componentName),
+            t.objectExpression(
+              attributes.map((attr) => {
+                return this.createAttribute(t, attr);
+              })
+            ),
+          ]
+        )
       ),
     ]);
 
@@ -147,7 +155,7 @@ class LiquidJsx {
     return t.variableDeclaration("const", [
       t.variableDeclarator(
         t.identifier(`__el${elId}`),
-        this.createElementCreator(t, openingElement, elId),
+        this.createElementCreator(t, openingElement, elId)
       ),
     ]);
   }
@@ -156,40 +164,25 @@ class LiquidJsx {
     return t.variableDeclaration("const", [
       t.variableDeclarator(
         t.identifier(`__txtEl${elId}`),
-        t.callExpression(
-          t.memberExpression(
-            t.identifier("Liquid"),
-            t.identifier("createTextNode")
-          ),
-          [t.stringLiteral(node.value.trim())]
-        )
+        t.stringLiteral(node.value.trim())
       ),
     ]);
   }
 
   convertJSXEspression(t, node, elId = 0) {
     const { expression } = node;
-    
+
     if (expression.type === "Identifier") {
       return t.variableDeclaration("const", [
         t.variableDeclarator(
           t.identifier(`__el${elId}`),
-          t.callExpression(
-            t.memberExpression(
-              t.identifier("Liquid"),
-              t.identifier("createTextNode")
-            ),
-            [expression]
-          )
+          expression,
         ),
       ]);
     }
-    
+
     return t.variableDeclaration("const", [
-      t.variableDeclarator(
-        t.identifier(`__el${elId}`),
-        expression
-      ),
+      t.variableDeclarator(t.identifier(`__el${elId}`), expression),
     ]);
   }
 
@@ -233,30 +226,103 @@ class LiquidJsx {
       ],
     });
 
-    const Liquid = `{
+    const AlloiReactive = `{
+      subscribeToAtomic: (running, subscriptions) => {
+        subscriptions.add(running);
+      },
+      useAtomic: (state) => {
+        const subscriptions = new Set();
+      
+        const setState = (newState) => {
+          state = newState;
+          for (const sub of [...subscriptions]) {
+            sub.react();
+          }
+        }
+      
+        const getState = () => {
+          const reactor = reactors[reactors.length - 1];
+          if (reactor) AlloiReactive.subscribeToAtomic(reactor, subscriptions);
+          return state;
+        };
+      
+        return [getState, setState];
+      },
+      createReactor: (fn) => {
+        const react = () => {
+          cleanupDependencies(currentReactor);
+          reactors.push(currentReactor);
+          try {
+            fn();
+          } finally {
+            reactors.pop();
+          }
+        };
+      
+        const currentReactor = {
+          react,
+            dependencies: new Set()
+          };
+      
+        react();
+      }
+    }`;
+
+    const AlloiDOM = `{
       createElement: (tag, attrs) => {
         const el = document.createElement(tag);
         for (let key in attrs) {
           const isEvent = key.startsWith("on");
           if (isEvent) {
-            el.addEventListener(key.substring(2), attrs[key]);
+            el.addEventListener(key.substring(2).toLowerCase(), attrs[key]);
           } else {
             el.setAttribute(key, attrs[key]);
           }
-        };
+        }
 
         return el;
       },
-      createTextNode: (text) => {
-        return document.createTextNode(text);
+      convertToNode: (child) => {
+        if (typeof child === 'string' || typeof child === 'number') {
+          return document.createTextNode(child);
+        } else if (typeof child === 'function') {
+          return AlloiDOM.convertToNode(child());
+        } else {
+          return child;
+        }
       },
+      insert: (parent, child) => {
+        let childNode = AlloiDOM.convertToNode(child);
+        parent.appendChild(childNode);
+
+        if (typeof child === 'function') {
+          AlloiReactive.createReactor(() => {
+            const newChild = AlloiDOM.convertToNode(child);
+            parent.replaceChild(newChild, childNode);
+            childNode = newChild;
+          })
+        }
+      },
+      render: (rootEl, rootNode) => {
+        rootEl.appendChild(rootNode);
+      }
     }`;
 
     return `
-      const Liquid = ${Liquid};
+      const reactors = [];
+
+      const cleanupDependencies = (currentReactor) => {
+        for (const dep of currentReactor.dependencies) {
+          dep.delete(currentReactor);
+        }
+        currentReactor.dependencies.clear();
+      }
+
+      const AlloiDOM = ${AlloiDOM};
+      const AlloiReactive = ${AlloiReactive};
       ${newCode.code}
     `;
   }
 }
 
-module.exports = LiquidJsx;
+module.exports = AlloiJSX;
