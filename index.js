@@ -227,7 +227,7 @@ class AlloiJSX {
     });
 
     return `
-      import { createElement, createComponent, insert } from "alloi/dom";
+      import { createElement, createComponent, insert } from "alloi";
 
       ${newCode.code}
     `;
