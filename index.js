@@ -226,48 +226,9 @@ class AlloiJSX {
       ],
     });
 
-    const AlloiDOM = `{
-      createElement: (tag, attrs) => {
-        const el = document.createElement(tag);
-        for (let key in attrs) {
-          const isEvent = key.startsWith("on");
-          if (isEvent) {
-            el.addEventListener(key.substring(2).toLowerCase(), attrs[key]);
-          } else {
-            el.setAttribute(key, attrs[key]);
-          }
-        }
-
-        return el;
-      },
-      convertToNode: (child) => {
-        if (typeof child === 'string' || typeof child === 'number') {
-          return document.createTextNode(child);
-        } else if (typeof child === 'function') {
-          return AlloiDOM.convertToNode(child());
-        } else {
-          return child;
-        }
-      },
-      insert: (parent, child) => {
-        let childNode = AlloiDOM.convertToNode(child);
-        parent.appendChild(childNode);
-
-        if (typeof child === 'function') {
-          AlloiReactive.createReactor(() => {
-            const newChild = AlloiDOM.convertToNode(child);
-            parent.replaceChild(newChild, childNode);
-            childNode = newChild;
-          })
-        }
-      },
-      createComponent: (Component, props) => {
-        return Component(props);
-      }
-    }`;
-
     return `
-      const AlloiDOM = ${AlloiDOM};
+      import { createElement, createComponent, insert } from "alloi/dom";
+
       ${newCode.code}
     `;
   }
