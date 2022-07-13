@@ -126,7 +126,7 @@ class AlloiJSX {
         t.identifier(componentId),
         t.callExpression(
           t.memberExpression(
-            t.identifier("Liquid"),
+            t.identifier("AlloiDOM"),
             t.identifier("createComponent")
           ),
           [
@@ -261,8 +261,8 @@ class AlloiJSX {
           })
         }
       },
-      render: (rootEl, rootNode) => {
-        rootEl.appendChild(rootNode);
+      createComponent: (Component, props) => {
+        return Component(props);
       }
     }`;
 
