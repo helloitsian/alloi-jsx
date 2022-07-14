@@ -15,7 +15,7 @@ class AlloiJSX {
     const { attributes } = openingElement;
 
     return t.callExpression(
-      t.memberExpression(t.identifier("AlloiDOM"), t.identifier("createElement")),
+      t.identifier("createElement"),
       [
         t.stringLiteral(name),
         t.objectExpression(
@@ -41,7 +41,7 @@ class AlloiJSX {
 
     return t.expressionStatement(
       t.callExpression(
-        t.memberExpression(t.identifier("AlloiDOM"), t.identifier("insert")),
+        t.identifier("insert"),
         [t.identifier(parent), t.identifier(_child)]
       )
     );
@@ -125,17 +125,14 @@ class AlloiJSX {
       t.variableDeclarator(
         t.identifier(componentId),
         t.callExpression(
-          t.memberExpression(
-            t.identifier("AlloiDOM"),
-            t.identifier("createComponent")
-          ),
+          t.identifier("createComponent"),
           [
             t.identifier(componentName),
             t.objectExpression(
               attributes.map((attr) => {
                 return this.createAttribute(t, attr);
               })
-            ),
+            )
           ]
         )
       ),
@@ -195,7 +192,11 @@ class AlloiJSX {
     ];
   }
 
-  parseJsx(code) {
+  parseJsx(code, absolutePath) {
+    if (absolutePath.includes("node_modules")) {
+      return code;
+    }
+
     var self = this;
 
     const newCode = babel.transformSync(code, {
