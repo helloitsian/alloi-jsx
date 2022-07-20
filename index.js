@@ -69,31 +69,30 @@ class AlloiJSX {
         const noWhiteSpace = child.value.replace(/\s/g, "");
         if (noWhiteSpace.length > 0) {
           _child = `__txtEl${elId}`;
-          childrenArray.push(self.convertJSXTextNode(t, child, elId++));
+          childrenArray.push(self.convertJSXTextNode(t, child, elId));
           return _child;
         }
       },
       JSXExpressionContainer: (child) => {
-        _child = `__el${++elId}`;
+        _child = `__el${elId}`;
         childrenArray.push(self.convertJSXEspression(t, child, elId));
         return _child;
       },
       JSXSpreadChild: (child) => {
-        _child = `__el${elId}`;
-        console.log(child);
+        _child = `__el${elId++}`;
         return _child;
       },
       JSXElement: (child) => {
         _child = `__el${elId}`;
         childrenArray.push(
-          self.convertJSXNode(t, child.openingElement, elId++)
+          self.convertJSXNode(t, child.openingElement, elId)
         );
 
         // recurse through child's children
         if (child.children)
           childrenArray = [
             ...childrenArray,
-            ...self.convertJSXChildren(t, child.children, elId),
+            ...self.convertJSXChildren(t, child.children, ++elId),
           ];
 
         return _child;
@@ -103,14 +102,11 @@ class AlloiJSX {
     for (let i = 0; i < children.length; i++) {
       let child = children[i];
 
-      if (!handlers[child.type]) {
-        console.log(child.type);
-      }
-
       let _child = handlers[child.type](child);
-
+      console.log(child.type, _child);
       if (_child) {
         childrenArray.push(this.createInsert(t, _parent, _child));
+        elId++;
       }
     }
     return childrenArray;
@@ -124,7 +120,7 @@ class AlloiJSX {
     const component = t.variableDeclaration("const", [
       t.variableDeclarator(
         t.identifier(componentId),
-        t.callExpression(
+        t.callExpression( 
           t.identifier("createComponent"),
           [
             t.identifier(componentName),
