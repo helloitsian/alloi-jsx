@@ -1,4 +1,4 @@
-const LiquidJsx = require("../index.js");
+const AlloiJSX = require("../index.js");
 
 const code = `
   const ChildComponent = () => <h1>Hello World</h1>;
@@ -9,7 +9,7 @@ const code = `
   }
 `
 
-const compiler = new LiquidJsx();
+const compiler = new AlloiJSX();
 const compiled = compiler.parseJsx(code);
 
 console.log(compiled);

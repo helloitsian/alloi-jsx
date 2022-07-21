@@ -1,5 +1,5 @@
 const fs = require('fs');
-const LiquidJsx = require("../index.js");
+const AlloiJSX = require("../index.js");
 
 const code = `
 import { useAtomic, render } from "alloi";
@@ -22,7 +22,7 @@ render(root, <Component />);
 export default Component;
 `
 
-const compiler = new LiquidJsx();
+const compiler = new AlloiJSX();
 const compiled = compiler.parseJsx(code, __dirname + "/case1.test.js");
 
 fs.writeFileSync(__dirname + "/out/case1.test.out.js", compiled);

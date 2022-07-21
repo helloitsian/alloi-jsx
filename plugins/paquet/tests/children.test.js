@@ -1,4 +1,4 @@
-const LiquidJsx = require("../index.js");
+const AlloiJSX = require("../index.js");
 
 const code = `const Component = () => {
   return <div>
@@ -6,7 +6,7 @@ const code = `const Component = () => {
   </div>;
 }`
 
-const compiler = new LiquidJsx();
+const compiler = new AlloiJSX();
 const compiled = compiler.parseJsx(code);
 
 console.log(compiled);

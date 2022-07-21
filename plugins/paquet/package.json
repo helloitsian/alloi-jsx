@@ -1,0 +1,18 @@
+{
+  "name": "paquet-plugin-alloi-jsx",
+  "version": "0.0.1",
+  "description": "A paquet bundler plugin to transform JSX to Alloi code",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/helloitsian/alloi-jsx"
+  },
+  "author": "Ian Murawski (helloitsian)",
+  "license": "ISC",
+  "dependencies": {
+    "babel-plugin-transform-alloi-jsx": "^0.0.1"
+  }
+}

@@ -1,6 +1,5 @@
 
       import { createElement, createComponent, insert } from "alloi";
-
       import { useAtomic, render } from "alloi";
 
 const Component = () => {
@@ -8,22 +7,19 @@ const Component = () => {
   return (() => {
     const __el0 = createElement("div", {});
 
-    const __el1 = count;
+    const __el1 = createElement("h1", {});
+
+    const __el2 = count;
+    insert(__el1, __el2);
     insert(__el0, __el1);
 
-    const __el2 = createElement("h1", {});
-
-    const __el3 = count;
-    insert(__el2, __el3);
-    insert(__el0, __el2);
-
-    const __el4 = createElement("button", {
+    const __el3 = createElement("button", {
       "onClick": () => setCount(count() + 1)
     });
 
-    const __txtEl5 = "Click me!";
-    insert(__el4, __txtEl5);
-    insert(__el0, __el4);
+    const __txtEl4 = "Click me!";
+    insert(__el3, __txtEl4);
+    insert(__el0, __el3);
     return __el0;
   })();
 }; // render the component

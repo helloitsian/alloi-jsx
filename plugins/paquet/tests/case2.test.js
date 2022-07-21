@@ -1,5 +1,5 @@
 const fs = require('fs');
-const LiquidJsx = require("../index.js");
+const AlloiJSX = require("../index.js");
 
 const code = `
 import { useAtomic, render } from "alloi";
