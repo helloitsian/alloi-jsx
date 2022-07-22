@@ -6,7 +6,7 @@ const AlloiJSXBabel = require("babel-plugin-transform-alloi-jsx");
 module.exports = {
   name: "alloi-jsx",
   setup(build) {
-    build.onLoad({ filter: /\.jsx$/ }, async (args) => {
+    build.onLoad({ filter: /\.[^\/\s\?]+$/ }, async (args) => {
       const source = await readFile(args.path, { encoding: "utf8" });
 
       const filename = Path.basename(args.path);
